@@ -17,11 +17,19 @@
         type:String,
         required:true
     },
-    inventory:[{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
-        required: true
+    inventory: [{
+        product: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Product",
+            required: true
+        },
+        quantity: {
+            type: Number,
+            required: true,
+            min: 0
+        }
     }]
+    
  },{timestamps:true})
 
  SellerSchema.methods.toJSON = function () {

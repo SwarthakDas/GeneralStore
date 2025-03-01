@@ -8,6 +8,7 @@ import cookieParser from "cookie-parser"
 import connectDB from "./db/index.js"
 import { router as userRoutes } from "./routes/user.routes.js"
 import { router as sellerRoutes } from "./routes/seller.routes.js"
+import { router as productRoutes } from "./routes/product.routes.js"
 
 dotenv.config()
 const app=express()
@@ -28,6 +29,7 @@ app.use(cookieParser())
 
 app.use("/user",userRoutes)
 app.use("/seller",sellerRoutes)
+app.use("/product",productRoutes)
 
 const PORT=process.env.PORT || 6001
 connectDB()
