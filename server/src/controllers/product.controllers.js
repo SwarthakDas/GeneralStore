@@ -90,8 +90,21 @@ export const buyProduct=AsyncHandler(async(req,res)=>{
     inventoryItem.quantity-=quantity;
     await seller.save()
 
-    user.cart.push({product:product._id,quantity})
+    user.orders.push({product:product._id,quantity})
     await user.save()
 
     return res.status(201).json(new ApiResponse(201, "Product ordered successfully"));
+})
+
+export const getProducts=AsyncHandler(async(req,res)=>{
+    const products = await Product.aggregate([
+        {
+            $group: {
+                _id: "$category",
+                products: { $push: "$$ROOT" }
+            }
+        }
+    ]);
+    if(!products)return res.status(400).json(new ApiResponse(400,"No products found"))
+    return res.status(201).json(new ApiResponse(201,products, "Product fetched successfully"));
 })

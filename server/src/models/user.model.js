@@ -17,7 +17,7 @@
         type:String,
         required:true
     },
-    cart: [{
+    orders: [{
             product: {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: "Product",
@@ -28,7 +28,11 @@
                 required: true,
                 min: 0
             }
-    }]
+    }],
+    address:{
+        type:String,
+        required:true
+    }
  },{timestamps:true})
 
  UserSchema.methods.toJSON = function () {

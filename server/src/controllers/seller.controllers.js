@@ -23,12 +23,12 @@ const generateTokenSeller=async(id)=>{
 }
 
 export const registerSeller=AsyncHandler(async(req,res)=>{
-    const {name,email,password}=req.body
+    const {name,email,password,address}=req.body
     const existingSeller=await Seller.findOne({email})
     if(existingSeller)throw new ApiError(400,"Seller with this email already exists");
 
     const seller=await Seller.create({
-        name,email,password
+        name,email,password,address
     })
 
     const createdSeller=await Seller.findById(seller._id).select("-password -refreshToken")

@@ -28,7 +28,11 @@
             required: true,
             min: 0
         }
-    }]
+    }],
+    address:{
+        type:String,
+        required:true
+    }
     
  },{timestamps:true})
 

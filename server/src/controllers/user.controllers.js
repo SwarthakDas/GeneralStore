@@ -4,6 +4,8 @@ import {ApiResponse} from "../utils/ApiResponse.js"
 import { User } from "../models/user.model.js"
 import jwt from "jsonwebtoken"
 import "dotenv/config"
+import {Product} from "../models/product.model.js"
+import { Seller } from "../models/seller.model.js"
 
 const generateTokenUser=async(id)=>{
     try {
@@ -23,15 +25,15 @@ const generateTokenUser=async(id)=>{
 }
 
 export const registerUser=AsyncHandler(async(req,res)=>{
-    const {name,email,password}=req.body
+    const {name,email,password,address}=req.body
     const existingUser=await User.findOne({email})
     if(existingUser)throw new ApiError(400,"User with this email already exists");
 
     const user=await User.create({
-        name,email,password
+        name,email,password,address
     })
 
-    const createdUser=await User.findById(user._id).select("-password -refreshToken")
+    const createdUser=await User.findById(user._id).select("-password")
     if(!createdUser)throw new ApiError(500,"Error occured while registering user");
     
     const {accessToken, refreshToken}= await generateTokenUser(user._id)
@@ -71,7 +73,7 @@ export const loginUser=AsyncHandler(async(req,res)=>{
   
     const {accessToken, refreshToken}= await generateTokenUser(user._id)
   
-    const loggedInUser=await User.findById(user._id).select("-password -refreshToken")
+    const loggedInUser=await User.findById(user._id).select("-password")
 
     if(!loggedInUser)throw new ApiError(500,"Failed to log int");
   
@@ -165,4 +167,36 @@ export const logoutUser=AsyncHandler(async(req, res)=>{
       throw new ApiError(401, error?.message || "Invalid refresh token");
     }
 });
-  
+
+export const userOrders=AsyncHandler(async(req,res)=>{
+  const incomingAccessToken = req.cookies.accessToken
+    
+      if (!incomingAccessToken) {
+        return res.status(500).json(
+          new ApiResponse(500, {}, "Error getting Seller")
+        );
+      }
+    
+      const decodedToken = jwt.verify(
+          incomingAccessToken,
+          process.env.USER_ACCESS_TOKEN_SECRET
+      );
+
+  const user= await User.findById(decodedToken._id)
+  if(!user)return res.status(404).json(new ApiResponse(404, {}, "User not found"));
+
+  const orders = await Promise.all(
+    user.orders.map(async (item) => {
+      const product = await Product.findById(item.product).select("-_id -createdAt -updatedAt -quantity -__v");
+      const seller=await Seller.findById(product.seller).select("name address")
+      return {
+        product,
+        quantity: item.quantity,
+        sellerName:seller.name,
+        sellerAddress:seller.address
+      };
+    })
+  );
+
+  return res.status(201).json(new ApiResponse(201,orders, "Orders fetched successfully"));
+})
