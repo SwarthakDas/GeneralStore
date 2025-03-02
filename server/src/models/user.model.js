@@ -17,10 +17,17 @@
         type:String,
         required:true
     },
-    cart:[{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
-        required: true
+    cart: [{
+            product: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Product",
+                required: true
+            },
+            quantity: {
+                type: Number,
+                required: true,
+                min: 0
+            }
     }]
  },{timestamps:true})
 
