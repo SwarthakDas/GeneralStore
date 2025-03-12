@@ -4,6 +4,7 @@ import {ApiResponse} from "../utils/ApiResponse.js"
 import {Seller} from "../models/seller.model.js"
 import jwt from "jsonwebtoken"
 import "dotenv/config"
+import { Product } from "../models/product.model.js"
 
 const generateTokenSeller=async(id)=>{
     try {
@@ -166,4 +167,33 @@ export const logoutSeller=AsyncHandler(async(req, res)=>{
       throw new ApiError(401, error?.message || "Invalid refresh token");
     }
 });
-  
+
+export const sellerInventory=AsyncHandler(async(req,res)=>{
+  const incomingAccessToken = req.cookies.accessToken
+    
+      if (!incomingAccessToken) {
+        return res.status(500).json(
+          new ApiResponse(500, {}, "Error getting Seller")
+        );
+      }
+    
+      const decodedToken = jwt.verify(
+          incomingAccessToken,
+          process.env.USER_ACCESS_TOKEN_SECRET
+      );
+
+  const seller= await Seller.findById(decodedToken._id)
+  if(!seller)return res.status(404).json(new ApiResponse(404, {}, "Seller not found"));
+
+  const orders = await Promise.all(
+    seller.inventory.map(async (item) => {
+      const product = await Product.findById(item.product).select("-_id -createdAt -updatedAt -quantity -__v");
+      return {
+        product,
+        quantity: item.quantity,
+      };
+    })
+  );
+
+  return res.status(201).json(new ApiResponse(201,orders, "Inventory fetched successfully"));
+})
