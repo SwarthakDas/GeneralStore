@@ -10,12 +10,12 @@
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.14.0",
     "mongoose": "^8.11.0",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "razorpay": "^2.9.6"
   },
   "name": "server",
   "version": "1.0.0",
   "main": "index.js",
-  "devDependencies": {},
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
